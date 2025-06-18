@@ -1,101 +1,157 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Users, Plus, LogIn } from "lucide-react";
+import { io } from "socket.io-client";
+
+export default function HomePage() {
+  const [roomCode, setRoomCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
+  const [teamCount, setTeamCount] = useState(2);
+  const [isCreating, setIsCreating] = useState(false);
+  const router = useRouter();
+
+  const createRoom = async () => {
+    if (!playerName.trim()) return;
+
+    setIsCreating(true);
+    try {
+      const socket = io();
+
+      socket.emit(
+        "create-room",
+        { teamCount, hostName: playerName },
+        (response: { success: string; error: string; roomCode: string }) => {
+          if (response.success) {
+            router.push(
+              `/room/${response.roomCode}?name=${encodeURIComponent(
+                playerName
+              )}&host=true`
+            );
+          } else {
+            console.error("Failed to create room:", response.error);
+          }
+          setIsCreating(false);
+          socket.disconnect();
+        }
+      );
+    } catch (error) {
+      console.error("Failed to create room:", error);
+      setIsCreating(false);
+    }
+  };
+
+  const joinRoom = () => {
+    if (!roomCode.trim() || !playerName.trim()) return;
+    router.push(
+      `/room/${roomCode.toUpperCase()}?name=${encodeURIComponent(playerName)}`
+    );
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Quiz Buzzer</h1>
+          <p className="text-gray-600">Create or join a quiz room</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="space-y-6">
+          {/* Player Name Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Your Name</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                placeholder="Enter your name"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                className="text-lg h-12"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Create Room */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Create Room
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="teams">Number of Teams</Label>
+                <div className="flex items-center gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTeamCount(Math.max(2, teamCount - 1))}
+                    disabled={teamCount <= 2}
+                  >
+                    -
+                  </Button>
+                  <span className="text-xl font-semibold w-12 text-center">
+                    {teamCount}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTeamCount(Math.min(8, teamCount + 1))}
+                    disabled={teamCount >= 8}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+              <Button
+                onClick={createRoom}
+                disabled={!playerName.trim() || isCreating}
+                className="w-full h-12 text-lg"
+                size="lg"
+              >
+                <Users className="h-5 w-5 mr-2" />
+                {isCreating ? "Creating..." : "Create Room"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Join Room */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LogIn className="h-5 w-5" />
+                Join Room
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                placeholder="Enter room code"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                className="text-lg h-12 text-center font-mono"
+                maxLength={6}
+              />
+              <Button
+                onClick={joinRoom}
+                disabled={!roomCode.trim() || !playerName.trim()}
+                className="w-full h-12 text-lg"
+                size="lg"
+                variant="outline"
+              >
+                <LogIn className="h-5 w-5 mr-2" />
+                Join Room
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
