@@ -21,7 +21,10 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io();
+      const socket = io(undefined, {
+        transports: ["websocket"],
+        path: "/socket.io", // optional but safe to be explicit
+      });
 
       socket.emit(
         "create-room",
