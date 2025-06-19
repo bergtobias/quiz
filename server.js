@@ -3,7 +3,7 @@ import next from "next";
 import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = process.env.HOST || "localhost";
+const hostname = process.env.HOST || "localhost"; // no protocol here
 const port = 3000;
 
 const app = next({ dev, hostname, port });
@@ -76,7 +76,7 @@ app.prepare().then(() => {
   const httpServer = createServer(handler);
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
+      origin: process.env.NEXT_PUBLIC_HOST || "*",
       methods: ["GET", "POST"],
     },
   });

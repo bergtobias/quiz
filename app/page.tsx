@@ -21,9 +21,9 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io(undefined, {
+      const socket = io(process.env.NEXT_PUBLIC_HOST, {
         transports: ["websocket"],
-        path: "/socket.io", // optional but safe to be explicit
+        path: "/socket.io",
       });
 
       socket.emit(
