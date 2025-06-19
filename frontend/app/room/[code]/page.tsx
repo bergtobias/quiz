@@ -45,10 +45,9 @@ export default function RoomPage() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_HOST, {
-      transports: ["websocket"],
-      path: "/socket.io",
-    });
+    const newSocket = io(
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+    );
 
     newSocket.on("connect", () => {
       setConnected(true);

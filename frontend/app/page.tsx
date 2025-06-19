@@ -21,10 +21,9 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io(process.env.NEXT_PUBLIC_HOST, {
-        transports: ["websocket"],
-        path: "/socket.io",
-      });
+      const socket = io(
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+      );
 
       socket.emit(
         "create-room",
