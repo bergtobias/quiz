@@ -47,6 +47,7 @@ export default function RoomPage() {
   useEffect(() => {
     const newSocket = io("/socket.io", {
       transports: ["websocket"], // 🚨 force websocket only
+      withCredentials: false,
     });
     console.log(newSocket);
 

@@ -21,8 +21,9 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io("/socket.io", {
-        transports: ["websocket"], // 🚨 force websocket only
+      const socket = io({
+        transports: ["websocket"], // optional, to avoid polling fallback
+        withCredentials: false, // since CORS is '*'
       });
       console.log(socket);
 
