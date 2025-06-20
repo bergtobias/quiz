@@ -21,8 +21,11 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io("/socket.io");
+      const socket = io("/socket.io", {
+        transports: ["websocket"], // 🚨 force websocket only
+      });
       console.log(socket);
+
       socket.emit(
         "create-room",
         { teamCount, hostName: playerName },
