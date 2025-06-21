@@ -21,7 +21,7 @@ export default function HomePage() {
 
     setIsCreating(true);
     try {
-      const socket = io({
+      const socket = io("https://quiz.bergtobias.com", {
         transports: ["websocket"], // optional, to avoid polling fallback
         withCredentials: false, // since CORS is '*'
       });

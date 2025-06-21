@@ -45,7 +45,7 @@ export default function RoomPage() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io("/socket.io", {
+    const newSocket = io("https://quiz.bergtobias.com", {
       transports: ["websocket"], // 🚨 force websocket only
       withCredentials: false,
     });
